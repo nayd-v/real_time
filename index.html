@@ -1,31 +1,31 @@
-!DOCTYPE html
-html
-head
-    titleObject Detection (Fixed Mirror)title
-    style
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Object Detection (Fixed Mirror)</title>
+    <style>
         video, canvas {
-            width 100%;
-            max-width 640px;
-            object-fit cover;
+            width: 100%;
+            max-width: 640px;
+            object-fit: cover;
         }
         body {
-            margin 0;
-            display flex;
-            flex-direction column;
-            align-items center;
-            background #1a1a1a;
-            color white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #1a1a1a;
+            color: white;
         }
-    style
-    script src=httpscdn.jsdelivr.netnpm@tensorflowtfjsscript
-    script src=httpscdn.jsdelivr.netnpm@tensorflow-modelscoco-ssdscript
-head
-body
-    h2Наведите камеру на объектh2
-    video id=video autoplay playsinlinevideo
-    canvas id=canvascanvas
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+</head>
+<body>
+    <h2>Наведите камеру на объект</h2>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
 
-    script
+    <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -33,19 +33,19 @@ body
 
         async function init() {
             try {
-                 Запуск камеры (задняя)
+                // Запуск камеры (задняя)
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video {
-                        facingMode 'environment',  Используем заднюю камеру
-                        width { ideal 640 },
-                        height { ideal 480 }
+                    video: {
+                        facingMode: 'environment', // Используем заднюю камеру
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
                     }
                 });
                 video.srcObject = stream;
 
-                 Инициализация видео и canvas
-                await new Promise((resolve) = {
-                    video.onloadedmetadata = () = {
+                // Инициализация видео и canvas
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
                         video.play();
@@ -53,25 +53,25 @@ body
                     };
                 });
 
-                 Загрузка модели
+                // Загрузка модели
                 statusText.textContent = 'Загрузка модели...';
                 const model = await cocoSsd.load();
                 statusText.textContent = 'Готово!';
 
-                 Обработка кадров
-                setInterval(async () = {
+                // Обработка кадров
+                setInterval(async () => {
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     const predictions = await model.detect(canvas);
                     renderPredictions(predictions);
                 }, 300);
 
             } catch (error) {
-                statusText.textContent = `Ошибка ${error.message}`;
+                statusText.textContent = `Ошибка: ${error.message}`;
                 console.error(error);
             }
         }
 
-         Отрисовка без зеркалирования
+        // Отрисовка без зеркалирования
         function renderPredictions(predictions) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!predictions.length) {
@@ -80,20 +80,20 @@ body
             }
             statusText.textContent = '';
             
-            predictions.forEach(prediction = {
+            predictions.forEach(prediction => {
                 const [x, y, width, height] = prediction.bbox;
                 
-                 Прямоугольник
+                // Прямоугольник
                 ctx.strokeStyle = '#00FF00';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(x, y, width, height);
                 
-                 Текст (убедимся, что он не зеркалится)
+                // Текст (убедимся, что он не зеркалится)
                 ctx.fillStyle = '#00FF00';
                 ctx.font = '14px Arial';
                 ctx.textBaseline = 'top';
                 ctx.fillText(
-                    `${prediction.class} (${Math.round(prediction.score  100)}%)`,
+                    `${prediction.class} (${Math.round(prediction.score * 100)}%)`,
                     x + 5,
                     y + 5
                 );
@@ -101,6 +101,6 @@ body
         }
 
         init();
-    script
-body
-html
+    </script>
+</body>
+</html>
